@@ -1,4 +1,8 @@
 from enum import Enum
+from parentnode import ParentNode
+from leafnode import LeafNode
+from textnode import text_node_to_html_node, TextNode, TextType
+from textnodefunctions import text_to_textnodes
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -33,21 +37,66 @@ def block_to_block_type(block:str) -> BlockType:
             return BlockType.PARAGRAPH
     lines = block.split("\n")
     count = 0
-    for line in lines:
-        if line.startswith(first_char):
-            count += 1
-        else:
-            count = 0
-            break
-    if count == len(lines):
-        return BlockType.QUOTE if first_char == ">" else BlockType.UNORDERED_LIST
-    for i in range(len(lines)):
-        if lines[i].startswith(f"{i+1}."):
-            count += 1
-        else:
-            count = 0
-            break
-    if count == len(lines):
-        return BlockType.ORDERED_LIST
-   
+    if first_char == "-" or first_char == "1" or first_char ==">":
+        for line in lines:
+            if line.startswith(first_char):
+                count += 1
+            else:
+                count = 0
+                break
+        if count == len(lines):
+            return BlockType.QUOTE if first_char == ">" else BlockType.UNORDERED_LIST
+        for i in range(len(lines)):
+            if lines[i].startswith(f"{i+1}."):
+                count += 1
+            else:
+                count = 0
+                break
+        if count == len(lines):
+            return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
+
+def text_to_html_node(text: str) -> list[LeafNode]:
+    text_nodes = text_to_textnodes(text)
+    leaf_nodes = map(text_node_to_html_node, text_nodes)
+    return list(leaf_nodes)
+
+
+def markdown_to_html_node(markdown: str):
+    html_nodes = []
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        print(block)
+        print(block_type)
+        print("----------")
+        if block_type == BlockType.PARAGRAPH:
+            cleaned_block = " ".join(block.splitlines())
+            children = text_to_html_node(cleaned_block)
+            parent = ParentNode("p", children)
+            html_nodes.append(parent)
+        if block_type == BlockType.HEADING:
+            count_char = block.count("#")
+            cleaned_block = block[count_char + 1:]
+            children = text_to_html_node(cleaned_block)
+            parent = ParentNode(f"h{count_char}", children)
+            html_nodes.append(parent)
+        if block_type == BlockType.QUOTE:
+            cleaned_block = "".join(block.split(">"))
+            print(cleaned_block)
+            children = text_to_html_node(cleaned_block)
+            parent = ParentNode("blockquote", children)
+            html_nodes.append(parent)
+        if block_type == BlockType.UNORDERED_LIST:
+            list_lines = block.split("\n")
+            li_nodes = []
+            for line in list_lines:
+                if line == "":
+                    continue
+                cleaned_line = line[2:]
+                line_children = text_to_html_node(cleaned_line)
+                li_node = ParentNode("li", line_children)
+                li_nodes.append(li_node)
+            parent = ParentNode("ul", li_nodes)
+            html_nodes.append(parent)  
+    return ParentNode("div", html_nodes)

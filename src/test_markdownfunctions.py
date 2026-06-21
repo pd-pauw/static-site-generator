@@ -1,5 +1,5 @@
 import unittest
-from markdownfunctions import markdown_to_blocks, block_to_block_type, BlockType
+from markdownfunctions import markdown_to_blocks, block_to_block_type, BlockType, markdown_to_html_node
 
 class TestMarkdownFuntions(unittest.TestCase):
     def test_markdown_to_block(self):
@@ -114,3 +114,63 @@ with mulitple lines ``"""
         result = block_to_block_type(block)
         self.assertEqual(BlockType.PARAGRAPH, result) 
         
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+        html,
+        "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+    )
+
+    def test_headings(self):
+        md = """
+# Heading1
+
+## Heading2 **with some bold text**
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+        html,
+        "<div><h1>Heading1</h1><h2>Heading2 <b>with some bold text</b></h2></div>",
+    )
+
+    def test_blockquote(self):
+            md = """
+> this is a quote
+
+> this is a quote
+> with a secondline
+    """
+
+            node = markdown_to_html_node(md)
+            html = node.to_html()
+            self.assertEqual(
+            html,
+            "<div><blockquote> this is a quote</blockquote><blockquote> this is a quote\n with a secondline</blockquote></div>",
+        )
+
+    def test_unorderedlist(self):
+            md = """
+- this is an unordered list
+- this is the second item in the list
+- this is the third item
+    """
+
+            node = markdown_to_html_node(md)
+            html = node.to_html()
+            self.assertEqual(
+            html,
+            "<div><ul><li>this is an unordered list</li><li>this is the second item in the list</li><li>this is the third item</li></ul></div>",
+        )
