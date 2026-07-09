@@ -174,3 +174,32 @@ This is another paragraph with _italic_ text and `code` here
             html,
             "<div><ul><li>this is an unordered list</li><li>this is the second item in the list</li><li>this is the third item</li></ul></div>",
         )
+            
+    def test_orderedlist(self):
+            md = """
+1. this is an unordered list
+2. this is the second item in the list
+3. this is the third item
+    """
+
+            node = markdown_to_html_node(md)
+            html = node.to_html()
+            self.assertEqual(
+            html,
+            "<div><ol><li>this is an unordered list</li><li>this is the second item in the list</li><li>this is the third item</li></ol></div>",
+        )
+            
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
