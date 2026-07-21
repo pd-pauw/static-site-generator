@@ -158,7 +158,7 @@ This is another paragraph with _italic_ text and `code` here
             html = node.to_html()
             self.assertEqual(
             html,
-            "<div><blockquote> this is a quote</blockquote><blockquote> this is a quote\n with a secondline</blockquote></div>",
+            "<div><blockquote>this is a quote</blockquote><blockquote>this is a quote with a secondline</blockquote></div>",
         )
 
     def test_unorderedlist(self):

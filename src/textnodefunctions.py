@@ -20,16 +20,15 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
             new_nodes.append(node)
             continue
         split_nodes = node.text.split(delimiter)
-        if len(split_nodes) <= 2:
+        if len(split_nodes) % 2 == 0:
             raise Exception(f"Not valid Markdown Syntax: {node}")
-        if split_nodes[0]:
-            new_left_node = TextNode(split_nodes[0], TextType.TEXT)
-            new_nodes.append(new_left_node)
-        new_node = TextNode(split_nodes[1], text_type)
-        new_nodes.append(new_node)
-        if split_nodes[2]:
-            new_right_node = TextNode(split_nodes[2], TextType.TEXT)
-            new_nodes.append(new_right_node)
+        for i in range(len(split_nodes)):
+            if split_nodes[i] == "":
+                continue
+            if i % 2 == 0:
+                new_nodes.append(TextNode(split_nodes[i], TextType.TEXT))
+            else:
+                new_nodes.append(TextNode(split_nodes[i], text_type))
     return new_nodes
 
 def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:

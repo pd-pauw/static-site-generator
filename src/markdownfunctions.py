@@ -67,12 +67,10 @@ def markdown_to_html_node(markdown: str):
     blocks = markdown_to_blocks(markdown)
     for block in blocks:
         block_type = block_to_block_type(block)
-       # print(block)
-       # print(block_type)
-       # print("----------")
+
         if block_type == BlockType.PARAGRAPH:
             cleaned_block = " ".join(block.splitlines())
-            children = text_to_html_node(cleaned_block)
+            children = text_to_children(cleaned_block)
             parent = ParentNode("p", children)
             html_nodes.append(parent)
 
@@ -84,8 +82,14 @@ def markdown_to_html_node(markdown: str):
             html_nodes.append(parent)
 
         if block_type == BlockType.QUOTE:
-            cleaned_block = "".join(block.split(">"))
-            children = text_to_html_node(cleaned_block)
+            lines = block.split("\n")
+            new_lines = []
+            for line in lines:
+                if not line.startswith(">"):
+                    raise ValueError("invalid quote block")
+                new_lines.append(line.lstrip(">").strip())
+            content = " ".join(new_lines)
+            children = text_to_children(content)
             parent = ParentNode("blockquote", children)
             html_nodes.append(parent)
 
@@ -117,10 +121,17 @@ def markdown_to_html_node(markdown: str):
 
         if block_type == BlockType.CODE:
             cleaned_block = block[4:-3]
-            print(cleaned_block)
             child = LeafNode("code",cleaned_block)
             parent = ParentNode("pre",[child])
-            print(parent)
             html_nodes.append(parent)
 
     return ParentNode("div", html_nodes)
+
+
+def text_to_children(text: str):
+    text_nodes = text_to_textnodes(text)
+    children = []
+    for text_node in text_nodes:
+        html_node = text_node_to_html_node(text_node)
+        children.append(html_node)
+    return children

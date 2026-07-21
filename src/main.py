@@ -1,9 +1,12 @@
 from textnode import TextNode, TextType
+from helper_functions import copy_directory, extract_title
+from generate_page import generate_pages_recursive, generate_page
 
 def main():
     print("hello")
-    text_node = TextNode("some string", TextType.BOLD, "https://www.google.com")
-    print(text_node)
+    copy_directory("static/", "public/")
+    ##generate_page("content/index.md","template.html", "public/index.html")
+    generate_pages_recursive("content/","template.html", "public/")
 
 
 main()
